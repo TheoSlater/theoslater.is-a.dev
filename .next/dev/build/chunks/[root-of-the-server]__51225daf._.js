@@ -26,7 +26,7 @@ module.exports = mod;
 ]);
 const config = {
     plugins: {
-        '@tailwindcss/postcss': {}
+        autoprefixer: {}
     }
 };
 const __TURBOPACK__default__export__ = config;
