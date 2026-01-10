@@ -1,19 +1,9 @@
 import type React from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import Providers from "./providers";
 import "./globals.css";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-});
+import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Theo Slater | Full-Stack Developer",
@@ -34,11 +24,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#0B0B0C",
-  width: "device-width",
-  initialScale: 1,
-};
+const geist = Geist({
+  subsets: ["latin"],
+});
 
 export default function RootLayout({
   children,
@@ -47,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${jetbrainsMono.variable}`}>
+      <body className={geist.className}>
         <Providers>{children}</Providers>
         <Analytics />
       </body>
