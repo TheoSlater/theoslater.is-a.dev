@@ -1,9 +1,10 @@
 import type React from "react";
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import Providers from "./providers";
 import "./globals.css";
 import { Geist } from "next/font/google";
+import GradualBlur from "./components/GradualBlur";
 
 export const metadata: Metadata = {
   title: "Theo Slater | Full-Stack Developer",
@@ -36,7 +37,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={geist.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {" "}
+          <GradualBlur
+            target="parent"
+            position="bottom"
+            height="6rem"
+            strength={2}
+            divCount={5}
+            curve="bezier"
+            exponential={true}
+            opacity={1}
+          />
+          {children}
+        </Providers>
         <Analytics />
       </body>
     </html>
