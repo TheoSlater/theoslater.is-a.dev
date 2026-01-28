@@ -173,6 +173,7 @@ export default function DarkVeil({
     scanlineFrequency,
     warpAmount,
     resolutionScale,
+    onReadyAction,
   ]);
   return <canvas ref={ref} className="darkveil-canvas" />;
 }

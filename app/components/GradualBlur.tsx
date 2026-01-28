@@ -7,7 +7,6 @@ import React, {
   useMemo,
   PropsWithChildren,
 } from "react";
-import * as math from "mathjs";
 
 import "./GradualBlur.css";
 
@@ -104,6 +103,8 @@ const CURVE_FUNCTIONS: Record<string, (p: number) => number> = {
   "ease-out": (p) => 1 - Math.pow(1 - p, 2),
   "ease-in-out": (p) => (p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2),
 };
+
+const roundToTenths = (value: number) => Math.round(value * 10) / 10;
 
 const mergeConfigs = (
   ...configs: Partial<GradualBlurProps>[]
@@ -225,16 +226,15 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = (props) => {
 
       let blurValue: number;
       if (config.exponential) {
-        blurValue =
-          Number(math.pow(2, progress * 4)) * 0.0625 * currentStrength;
+        blurValue = Math.pow(2, progress * 4) * 0.0625 * currentStrength;
       } else {
         blurValue = 0.0625 * (progress * config.divCount + 1) * currentStrength;
       }
 
-      const p1 = math.round((increment * i - increment) * 10) / 10;
-      const p2 = math.round(increment * i * 10) / 10;
-      const p3 = math.round((increment * i + increment) * 10) / 10;
-      const p4 = math.round((increment * i + increment * 2) * 10) / 10;
+      const p1 = roundToTenths(increment * i - increment);
+      const p2 = roundToTenths(increment * i);
+      const p3 = roundToTenths(increment * i + increment);
+      const p4 = roundToTenths(increment * i + increment * 2);
 
       let gradient = `transparent ${p1}%, black ${p2}%`;
       if (p3 <= 100) gradient += `, black ${p3}%`;

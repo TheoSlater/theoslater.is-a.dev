@@ -4,7 +4,15 @@ import GreenPulse from "./Icons/GreenPulse";
 
 export function HeroContent() {
   return (
-    <Stack spacing={4} alignItems="flex-start" textAlign="left">
+    <Stack
+      spacing={4}
+      alignItems="flex-start"
+      textAlign="left"
+      sx={{
+        width: "100%",
+        maxWidth: "min(640px, 100%)",
+      }}
+    >
       <Chip
         icon={<GreenPulse />}
         label="Available for projects"
@@ -18,7 +26,7 @@ export function HeroContent() {
         })}
       />
 
-      <Typography variant="h3" fontWeight={550}>
+      <Typography variant="h3" fontWeight={450}>
         Hi, I&apos;m Theo.
         <br />A software engineer.
       </Typography>
@@ -26,7 +34,12 @@ export function HeroContent() {
       <Typography
         variant="subtitle1"
         color="text.secondary"
-        sx={{ maxWidth: "30vw" }}
+        sx={{
+          maxWidth: {
+            xs: "100%",
+            sm: "32rem",
+          },
+        }}
       >
         Mainly working with modern languages, I focus on learning,
         problem-solving, and building.
