@@ -10,7 +10,7 @@ import {
   formatNumber,
   getDateSuffix,
 } from "@/lib/formatters";
-import type { GithubContributionData } from "@/types/github-contributions";
+import type { GithubContributionData } from "@/lib/types/github-types";
 
 const getDateProps = () => {
   const today = new Date();

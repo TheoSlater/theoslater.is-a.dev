@@ -236,8 +236,8 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = (props) => {
       const p3 = roundToTenths(increment * i + increment);
       const p4 = roundToTenths(increment * i + increment * 2);
 
-      let gradient = `transparent ${p1}%, black ${p2}%`;
-      if (p3 <= 100) gradient += `, black ${p3}%`;
+      let gradient = `transparent ${p1}%, rgba(255, 255, 255, 1) ${p2}%`;
+      if (p3 <= 100) gradient += `, rgba(255, 255, 255, 1) ${p3}%`;
       if (p4 <= 100) gradient += `, transparent ${p4}%`;
 
       const direction = getGradientDirection(config.position);
@@ -249,6 +249,7 @@ const GradualBlur: React.FC<PropsWithChildren<GradualBlurProps>> = (props) => {
         WebkitMaskImage: `linear-gradient(${direction}, ${gradient})`,
         backdropFilter: `blur(${blurValue.toFixed(3)}rem)`,
         WebkitBackdropFilter: `blur(${blurValue.toFixed(3)}rem)`,
+        backgroundColor: "rgba(0, 0, 0, 0.01)",
         opacity: config.opacity,
         transition:
           config.animated && config.animated !== "scroll"

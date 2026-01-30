@@ -1,6 +1,7 @@
 import { GraphQLClient, gql } from "graphql-request";
+import { unstable_cache } from "next/cache";
 import { getGithubUsername } from "./metadata";
-import type { GithubContributionData } from "./types/github-contributions";
+import type { GithubContributionData } from "./types/github-types";
 
 const GetGithubContributions = gql`
   query ($userName: String!) {
@@ -27,7 +28,7 @@ const GetGithubContributions = gql`
 
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
-export const getGithubContributions =
+const getGithubContributionsUncached =
   async (): Promise<GithubContributionData | null> => {
     const token = process.env.GITHUB_ACCESS_TOKEN;
     if (!token) {
@@ -71,3 +72,9 @@ export const getGithubContributions =
       return null;
     }
   };
+
+export const getGithubContributions = unstable_cache(
+  getGithubContributionsUncached,
+  ["github-contributions"],
+  { revalidate: 3600 },
+);

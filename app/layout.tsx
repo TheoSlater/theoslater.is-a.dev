@@ -37,17 +37,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={geist.className}>
-        {" "}
-        {/*<GradualBlur
-          target="parent"
+        <GradualBlur
+          target="page"
           position="bottom"
           height="6rem"
-          strength={2}
+          strength={1}
           divCount={5}
           curve="bezier"
           exponential={true}
           opacity={1}
-        />*/}
+          zIndex={2000}
+        />
         <Providers>{children}</Providers>
         <Analytics />
       </body>
