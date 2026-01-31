@@ -13,11 +13,16 @@ import {
 import type { GithubContributionData } from "@/lib/types/github-types";
 
 const getDateProps = () => {
-  const today = new Date();
-  const twelveMonthsAgo = new Date(today);
-  twelveMonthsAgo.setFullYear(today.getFullYear() - 1);
+  const now = new Date();
+  const endDate = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const startDate = new Date(endDate);
+  startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
+  const weekStartOffset = startDate.getUTCDay();
+  startDate.setUTCDate(startDate.getUTCDate() - weekStartOffset);
 
-  return { startDate: twelveMonthsAgo, endDate: today };
+  return { startDate, endDate };
 };
 
 const RECT_SIZE = 16;
@@ -45,7 +50,24 @@ interface Props {
 }
 
 export default function GitHubActivityCard({ data }: Props) {
-  const dayCount = data.contributions?.length ?? 0;
+  const { startDate, endDate } = getDateProps();
+  const filledContributions = React.useMemo(() => {
+    const map = new Map(
+      (data.contributions ?? []).map((day) => [day.date, day.count]),
+    );
+    const items: GithubContributionData["contributions"] = [];
+    const cursor = new Date(startDate);
+
+    while (cursor <= endDate) {
+      const date = cursor.toISOString().slice(0, 10);
+      items.push({ date, count: map.get(date) ?? 0 });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+
+    return items;
+  }, [data.contributions, startDate, endDate]);
+
+  const dayCount = filledContributions.length ?? 0;
   const weekColumns = Math.max(1, Math.ceil(dayCount / 7));
   const heatmapMinWidth = Math.max(weekColumns * (RECT_SIZE + SPACE), 640);
 
@@ -62,9 +84,10 @@ export default function GitHubActivityCard({ data }: Props) {
 
       <Box sx={{ overflowX: "auto", width: "100%" }}>
         <HeatMap
-          {...getDateProps()}
+          startDate={startDate}
+          endDate={endDate}
           onMouseLeave={() => setHoveredTile(defaultLabel)}
-          value={data.contributions ?? []}
+          value={filledContributions}
           weekLabels={false}
           monthLabels={false}
           legendCellSize={0}
@@ -73,6 +96,7 @@ export default function GitHubActivityCard({ data }: Props) {
           rectProps={{ rx: 4 }}
           rectRender={renderRect((value) => setHoveredTile(value))}
           panelColors={{
+            0: "#0B1220",
             1: "#19222F",
             4: "#0F4E43",
             8: "#1F977B",

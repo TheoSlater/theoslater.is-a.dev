@@ -42,10 +42,7 @@ export default async function GridSection({
       >
         <FeaturedWorkCard />
         <PortfolioPlaceholderCard />
-        <TypingSpeedCard
-          minHeight={150}
-          sx={{ minHeight: { xs: "150px", md: "170px" } }}
-        />
+        <TypingSpeedCard />
         <GitHubActivityCardSection contributions={contributions} />
         <TechStackCard />
       </BentoGrid>

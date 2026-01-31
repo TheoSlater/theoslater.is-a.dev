@@ -9,6 +9,7 @@ import KeyboardIcon from "@mui/icons-material/Keyboard";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import TranslateIcon from "@mui/icons-material/Translate";
+import Link from "next/link";
 import CardLabel from "./card-label";
 import { BentoCard } from "./bento-card";
 
@@ -26,6 +27,12 @@ interface TypingSpeedCardProps {
   sx?: SxProps<Theme>;
 }
 
+declare global {
+  interface Window {
+    forceTypingSpeedRefresh?: () => Promise<void>;
+  }
+}
+
 export default function TypingSpeedCard({
   colSpan = 1,
   minHeight = 0,
@@ -36,17 +43,25 @@ export default function TypingSpeedCard({
   React.useEffect(() => {
     let alive = true;
 
-    fetch("/api/monkeytype/typing-speed")
-      .then((r) => r.json())
-      .then((j) => {
-        if (!alive) return;
-        if (j?.error) return;
-        setData(j);
-      })
-      .catch(() => {});
+    const load = async () => {
+      try {
+        const res = await fetch("/api/monkeytype/typing-speed");
+        const json = await res.json();
+        if (!alive || json?.error) return;
+        setData(json);
+      } catch {
+        // ignore
+      }
+    };
+
+    window.forceTypingSpeedRefresh = load;
+    void load();
 
     return () => {
       alive = false;
+      if (window.forceTypingSpeedRefresh === load) {
+        delete window.forceTypingSpeedRefresh;
+      }
     };
   }, []);
 
@@ -56,7 +71,26 @@ export default function TypingSpeedCard({
   const lang = data ? data.language : "—";
 
   return (
-    <BentoCard colSpan={colSpan} minHeight={minHeight} sx={sx} rowSpan={1}>
+    <BentoCard
+      component={Link}
+      href="https://monkeytype.com/profile/TheoSlater"
+      target="_blank"
+      rel="noreferrer"
+      ariaLabel="Open Monkeytype profile"
+      colSpan={colSpan}
+      minHeight={minHeight}
+      rowSpan={1}
+      sx={{
+        textDecoration: "none",
+        color: "inherit",
+        cursor: "pointer",
+        "&:focus-visible": {
+          outline: "2px solid rgba(148, 163, 184, 0.8)",
+          outlineOffset: "4px",
+        },
+        ...sx,
+      }}
+    >
       <CardLabel>
         <Box
           component="span"

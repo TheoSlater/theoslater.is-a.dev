@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { ONE_DAY_SECONDS, ONE_HOUR_SECONDS } from "@/lib/cache";
 
-export const revalidate = 300;
+export const revalidate = ONE_DAY_SECONDS;
 
 type MonkeytypeResult = {
   wpm: number;
@@ -67,7 +68,7 @@ export async function GET() {
     {
       headers: {
         "Cache-Control":
-          "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
+          `public, max-age=0, s-maxage=${ONE_DAY_SECONDS}, stale-while-revalidate=${ONE_HOUR_SECONDS}`,
       },
     },
   );

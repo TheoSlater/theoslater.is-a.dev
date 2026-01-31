@@ -2,16 +2,17 @@ import { GraphQLClient, gql } from "graphql-request";
 import { unstable_cache } from "next/cache";
 import { getGithubUsername } from "./metadata";
 import type { GithubContributionData } from "./types/github-types";
+import { ONE_DAY_SECONDS } from "./cache";
 
 const GetGithubContributions = gql`
-  query ($userName: String!) {
+  query ($userName: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $userName) {
       repositories(first: 1, orderBy: { direction: DESC, field: PUSHED_AT }) {
         nodes {
           pushedAt
         }
       }
-      contributionsCollection {
+      contributionsCollection(from: $from, to: $to) {
         contributionCalendar {
           totalContributions
           weeks {
@@ -49,9 +50,17 @@ const getGithubContributionsUncached =
     });
 
     try {
-      const response = (await client.request(GetGithubContributions, {
-        userName: username,
-      })) as { user: any };
+    const now = new Date();
+    const to = now.toISOString();
+    const fromDate = new Date(now);
+    fromDate.setUTCFullYear(now.getUTCFullYear() - 1);
+    const from = fromDate.toISOString();
+
+    const response = (await client.request(GetGithubContributions, {
+      userName: username,
+      from,
+      to,
+    })) as { user: any };
 
       const calendar =
         response.user.contributionsCollection.contributionCalendar;
@@ -76,5 +85,5 @@ const getGithubContributionsUncached =
 export const getGithubContributions = unstable_cache(
   getGithubContributionsUncached,
   ["github-contributions"],
-  { revalidate: 3600 },
+  { revalidate: ONE_DAY_SECONDS },
 );
