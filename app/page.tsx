@@ -2,8 +2,6 @@ import { HomeClient } from "./components/HomeClient";
 import { UnderConstruction } from "./components/UnderConstruction";
 import GridSection from "./grid/GridSection";
 
-export const revalidate = 3600;
-
 export default function Home() {
   return (
     <>

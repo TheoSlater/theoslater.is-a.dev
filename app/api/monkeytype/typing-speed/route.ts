@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { ONE_DAY_SECONDS, ONE_HOUR_SECONDS } from "@/lib/cache";
 
 // Next.js segment config requires a literal value.
-export const revalidate = 60 * 60 * 24;
+export const revalidate = 86400;
 
 type MonkeytypeResult = {
   wpm: number;
