@@ -30,6 +30,7 @@ const SPACE = 4;
 
 const renderRect =
   (handleMouseEnter: (value: string) => void): SVGProps["rectRender"] =>
+  // just to shut the error up, will find better solution
   // eslint-disable-next-line react/display-name
   (props, data) => {
     const date = new Date(data.date);
