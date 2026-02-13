@@ -1,3 +1,5 @@
+// i stole half this code from: https://github.com/jestsee/jestsee.com/blob/master/src/pages/_components/bento/BentoItemGithubActivity/BentoItemGithubActivityChart.tsx
+
 "use client";
 
 import { Box, Typography } from "@mui/material";
@@ -74,6 +76,13 @@ export default function GitHubActivityCard({ data }: Props) {
 
   const defaultLabel = `${formatNumber(data.totalContributions)} contributions in the last year`;
   const [hoveredTile, setHoveredTile] = React.useState<string>(defaultLabel);
+  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [filledContributions.length]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
@@ -83,7 +92,7 @@ export default function GitHubActivityCard({ data }: Props) {
         </Typography>
       </Box>
 
-      <Box sx={{ overflowX: "auto", width: "100%" }}>
+      <Box sx={{ overflowX: "auto", width: "100%" }} ref={scrollRef}>
         <HeatMap
           startDate={startDate}
           endDate={endDate}

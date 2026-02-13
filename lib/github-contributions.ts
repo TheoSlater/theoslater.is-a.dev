@@ -1,5 +1,4 @@
 import { GraphQLClient, gql } from "graphql-request";
-import { unstable_cache } from "next/cache";
 import { getGithubUsername } from "./metadata";
 import type { GithubContributionData } from "./types/github-types";
 import { ONE_DAY_SECONDS } from "./cache";
@@ -29,6 +28,22 @@ const GetGithubContributions = gql`
 
 const GITHUB_GRAPHQL_ENDPOINT = "https://api.github.com/graphql";
 
+const CACHE_TTL_MS = ONE_DAY_SECONDS * 1000;
+
+type ContributionsCache = {
+  expiresAt: number;
+  hasValue: boolean;
+  promise: Promise<GithubContributionData | null> | null;
+  value: GithubContributionData | null;
+};
+
+const contributionsCache: ContributionsCache = {
+  expiresAt: 0,
+  hasValue: false,
+  promise: null,
+  value: null,
+};
+
 const getGithubContributionsUncached =
   async (): Promise<GithubContributionData | null> => {
     const token = process.env.GITHUB_ACCESS_TOKEN;
@@ -50,17 +65,17 @@ const getGithubContributionsUncached =
     });
 
     try {
-    const now = new Date();
-    const to = now.toISOString();
-    const fromDate = new Date(now);
-    fromDate.setUTCFullYear(now.getUTCFullYear() - 1);
-    const from = fromDate.toISOString();
+      const now = new Date();
+      const to = now.toISOString();
+      const fromDate = new Date(now);
+      fromDate.setUTCFullYear(now.getUTCFullYear() - 1);
+      const from = fromDate.toISOString();
 
-    const response = (await client.request(GetGithubContributions, {
-      userName: username,
-      from,
-      to,
-    })) as { user: any };
+      const response = (await client.request(GetGithubContributions, {
+        userName: username,
+        from,
+        to,
+      })) as { user: any };
 
       const calendar =
         response.user.contributionsCollection.contributionCalendar;
@@ -82,8 +97,50 @@ const getGithubContributionsUncached =
     }
   };
 
-export const getGithubContributions = unstable_cache(
-  getGithubContributionsUncached,
-  ["github-contributions"],
-  { revalidate: ONE_DAY_SECONDS },
-);
+const cacheResult = (value: GithubContributionData | null) => {
+  contributionsCache.value = value;
+  contributionsCache.hasValue = true;
+  contributionsCache.expiresAt = Date.now() + CACHE_TTL_MS;
+};
+
+const startCacheRefresh = () => {
+  const promise = (async () => {
+    try {
+      const data = await getGithubContributionsUncached();
+      cacheResult(data);
+      return data;
+    } finally {
+      contributionsCache.promise = null;
+    }
+  })();
+
+  contributionsCache.promise = promise;
+  return promise;
+};
+
+export function invalidateGithubContributionsCache() {
+  contributionsCache.hasValue = false;
+  contributionsCache.expiresAt = 0;
+}
+
+export function refreshGithubContributionsCache() {
+  invalidateGithubContributionsCache();
+  return startCacheRefresh();
+}
+
+export async function getGithubContributions() {
+  const now = Date.now();
+
+  const cacheIsFresh =
+    contributionsCache.hasValue && contributionsCache.expiresAt > now;
+
+  if (cacheIsFresh) {
+    return contributionsCache.value;
+  }
+
+  if (contributionsCache.promise) {
+    return contributionsCache.promise;
+  }
+
+  return startCacheRefresh();
+}

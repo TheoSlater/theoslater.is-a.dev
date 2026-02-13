@@ -5,6 +5,7 @@ import Providers from "./providers";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import GradualBlur from "./components/GradualBlur";
+import GlobalBrowserCommands from "./components/GlobalBrowserCommands";
 
 export const metadata: Metadata = {
   title: "Theo Slater | Full-Stack Developer",
@@ -49,6 +50,7 @@ export default function RootLayout({
           opacity={1}
           zIndex={2000}
         />
+        <GlobalBrowserCommands />
         <Providers>{children}</Providers>
         <Analytics />
       </body>
