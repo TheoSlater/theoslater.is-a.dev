@@ -47,11 +47,17 @@ export async function GET() {
     return m2 === "15" || (Number.isFinite(td) && td >= 14.5 && td <= 15.5);
   };
 
-  const latest15 = data
+  const best15 = data
     .filter((r) => r.mode === "time" && is15s(r))
-    .sort((a, b) => b.timestamp - a.timestamp)[0];
+    .sort((a, b) => {
+      const wpmDiff = b.wpm - a.wpm;
+      if (wpmDiff !== 0) return wpmDiff;
+      const accDiff = b.acc - a.acc;
+      if (accDiff !== 0) return accDiff;
+      return b.timestamp - a.timestamp;
+    })[0];
 
-  if (!latest15) {
+  if (!best15) {
     return NextResponse.json(
       { error: "no 15secs time result found in fetched results" },
       { status: 404 },
@@ -60,11 +66,11 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      wpm: Math.round(latest15.wpm),
-      accuracy: Math.round(latest15.acc),
+      wpm: Math.round(best15.wpm),
+      accuracy: Math.round(best15.acc),
       duration: "15s",
-      language: latest15.language,
-      timestamp: latest15.timestamp,
+      language: best15.language,
+      timestamp: best15.timestamp,
     },
     {
       headers: {
