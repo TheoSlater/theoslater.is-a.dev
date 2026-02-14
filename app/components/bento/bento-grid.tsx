@@ -5,7 +5,9 @@ import type { SxProps, Theme } from "@mui/material";
 import type { ReactNode } from "react";
 
 const toCssSize = (value?: number | string) =>
-  value === undefined ? undefined : typeof value === "number" ? `${value}px` : value;
+  typeof value === "number" ? `${value}px` : value;
+
+const DEFAULT_ROW_HEIGHT = "minmax(160px, auto)";
 
 interface BentoGridProps {
   children: ReactNode;
@@ -24,7 +26,7 @@ export function BentoGrid({
 }: BentoGridProps) {
   const gridAutoRows = rowHeight
     ? `minmax(${toCssSize(rowHeight)}, auto)`
-    : "minmax(160px, auto)";
+    : DEFAULT_ROW_HEIGHT;
   return (
     <Box
       sx={{

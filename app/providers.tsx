@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import { CssBaseline } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { bentoPalette } from "@/lib/theme/bento";
 const theme = createTheme({
   palette: {
     mode: "dark",
@@ -18,6 +19,7 @@ const theme = createTheme({
       contrastText: "#0b0b0c",
     },
     divider: "rgba(255, 255, 255, 0.12)",
+    bento: bentoPalette,
   },
 });
 

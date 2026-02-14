@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import type { SimpleIcon } from "simple-icons";
+import { bentoPalette } from "@/lib/theme/bento";
 import {
   siAstro,
   siDotnet,
@@ -42,7 +43,7 @@ function TechIcon({ icon, label }: { icon: SimpleIcon; label: string }) {
         alignItems: "center",
         justifyContent: "center",
         width: ICON_SIZE + 36,
-        color: "rgba(226, 232, 240, 0.9)",
+        color: bentoPalette.icon,
       }}
       aria-label={label}
     >

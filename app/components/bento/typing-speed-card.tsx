@@ -4,7 +4,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import type { SxProps, Theme } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { alpha, useTheme } from "@mui/material/styles";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
@@ -15,11 +15,14 @@ import { BentoCard } from "./bento-card";
 
 type TypingSpeedPayload = {
   wpm: number;
-  accuracy: number; // Monkeytype "acc"
-  duration: string; // "15s"
-  language: string; // "english"
-  timestamp: number; // ms epoch
+  accuracy: number;
+  duration: string;
+  language: string;
+  timestamp: number;
 };
+
+const TYPING_SPEED_ENDPOINT = "/api/monkeytype/typing-speed";
+const MONKEYTYPE_PROFILE_URL = "https://monkeytype.com/profile/TheoSlater";
 
 interface TypingSpeedCardProps {
   colSpan?: number;
@@ -34,20 +37,21 @@ declare global {
 }
 
 export default function TypingSpeedCard({
-  colSpan = 1,
-  minHeight = 0,
+  // ignore minHeight if you want true full-height behavior
+  minHeight,
   sx,
 }: TypingSpeedCardProps) {
+  const theme = useTheme();
   const [data, setData] = React.useState<TypingSpeedPayload | null>(null);
 
   React.useEffect(() => {
-    let alive = true;
+    let isMounted = true;
 
     const load = async () => {
       try {
-        const res = await fetch("/api/monkeytype/typing-speed");
+        const res = await fetch(TYPING_SPEED_ENDPOINT);
         const json = await res.json();
-        if (!alive || json?.error) return;
+        if (!isMounted || json?.error) return;
         setData(json);
       } catch {
         // ignore
@@ -58,7 +62,7 @@ export default function TypingSpeedCard({
     void load();
 
     return () => {
-      alive = false;
+      isMounted = false;
       if (window.forceTypingSpeedRefresh === load) {
         delete window.forceTypingSpeedRefresh;
       }
@@ -73,23 +77,36 @@ export default function TypingSpeedCard({
   return (
     <BentoCard
       component={Link}
-      href="https://monkeytype.com/profile/TheoSlater"
+      href={MONKEYTYPE_PROFILE_URL}
       target="_blank"
       rel="noreferrer"
       ariaLabel="Open Monkeytype profile"
-      colSpan={colSpan}
-      minHeight={minHeight}
       rowSpan={1}
-      sx={{
-        textDecoration: "none",
-        color: "inherit",
-        cursor: "pointer",
-        "&:focus-visible": {
-          outline: "2px solid rgba(148, 163, 184, 0.8)",
-          outlineOffset: "4px",
+      minHeight={minHeight}
+      sx={[
+        {
+          cursor: "pointer",
+          textDecoration: "none",
+          color: "inherit",
+          "&:link": { color: "inherit" },
+          "&:visited": { color: "inherit" },
+          "&:active": { color: "inherit" },
+          "&:hover": { textDecoration: "none" },
+          "& *": { textDecoration: "none", color: "inherit" },
+          "& .MuiTypography-root": { textDecoration: "none", color: "inherit" },
+          "&:focus-visible": {
+            outline: `2px solid ${theme.palette.bento.focusOutline}`,
+            outlineOffset: "4px",
+          },
+
+          // ensure the card fills the grid row height
+          height: "100%",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
         },
-        ...sx,
-      }}
+        sx,
+      ]}
     >
       <CardLabel>
         <Box
@@ -119,16 +136,15 @@ export default function TypingSpeedCard({
         }}
       >
         <Typography
-          sx={(t) => ({
+          sx={{
             fontSize: { xs: 160, md: 180 },
             fontWeight: 700,
-
-            color: alpha(t.palette.text.primary, 0.04),
+            color: alpha(theme.palette.text.primary, 0.04),
             maskImage:
               "linear-gradient(to bottom, white 50%, transparent 100%)",
             WebkitMaskImage:
               "linear-gradient(to bottom, white 50%, transparent 100%)",
-          })}
+          }}
         >
           {wpm}
         </Typography>
@@ -137,7 +153,11 @@ export default function TypingSpeedCard({
       <Box
         sx={{
           position: "relative",
+
+          // let this area take the remaining height
           flex: 1,
+          minHeight: 0,
+
           display: "flex",
           flexDirection: "column",
           justifyContent: "flex-end",
@@ -169,7 +189,7 @@ export default function TypingSpeedCard({
         </Box>
 
         <Box
-          sx={(t) => ({
+          sx={{
             position: "relative",
             zIndex: 10,
             display: "flex",
@@ -177,8 +197,8 @@ export default function TypingSpeedCard({
             gap: 2,
             flexWrap: "wrap",
             mt: 2,
-            color: alpha(t.palette.text.primary, 0.5),
-          })}
+            color: alpha(theme.palette.text.primary, 0.5),
+          }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
             <AccessTimeIcon sx={{ fontSize: 16 }} />

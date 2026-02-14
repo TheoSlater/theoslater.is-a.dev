@@ -2,7 +2,7 @@
 
 "use client";
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useTheme } from "@mui/material";
 import HeatMap, { type SVGProps } from "@uiw/react-heat-map";
 import React from "react";
 
@@ -15,20 +15,27 @@ import {
 import type { GithubContributionData } from "@/lib/types/github-types";
 
 const getDateProps = () => {
-  const now = new Date();
-  const endDate = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-  );
-  const startDate = new Date(endDate);
-  startDate.setUTCFullYear(endDate.getUTCFullYear() - 1);
-  const weekStartOffset = startDate.getUTCDay();
-  startDate.setUTCDate(startDate.getUTCDate() - weekStartOffset);
+  const endDate = new Date();
+  endDate.setHours(23, 59, 59, 999);
 
-  return { startDate, endDate };
+  const startDate = new Date(endDate);
+  startDate.setDate(endDate.getDate() - 364);
+  startDate.setHours(0, 0, 0, 0);
+
+  const displayStartDate = new Date(startDate);
+  displayStartDate.setDate(startDate.getDate() - startDate.getDay());
+
+  return { startDate: displayStartDate, endDate };
 };
+
+const toLocalDateKey = (date: Date) =>
+  `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`;
+
+const toLocalDateFromIso = (date: string) => new Date(`${date}T00:00:00`);
 
 const RECT_SIZE = 16;
 const SPACE = 4;
+const HEATMAP_LEFT_PAD = 5;
 
 const renderRect =
   (handleMouseEnter: (value: string) => void): SVGProps["rectRender"] =>
@@ -53,30 +60,40 @@ interface Props {
 }
 
 export default function GitHubActivityCard({ data }: Props) {
+  const theme = useTheme();
   const { startDate, endDate } = getDateProps();
   const filledContributions = React.useMemo(() => {
+    const contributions = data.contributions ?? [];
     const map = new Map(
-      (data.contributions ?? []).map((day) => [day.date, day.count]),
+      contributions.map((day) => [
+        toLocalDateKey(toLocalDateFromIso(day.date)),
+        day.count,
+      ]),
     );
     const items: GithubContributionData["contributions"] = [];
     const cursor = new Date(startDate);
 
     while (cursor <= endDate) {
-      const date = cursor.toISOString().slice(0, 10);
+      const date = toLocalDateKey(cursor);
       items.push({ date, count: map.get(date) ?? 0 });
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
+      cursor.setDate(cursor.getDate() + 1);
     }
 
     return items;
   }, [data.contributions, startDate, endDate]);
 
-  const dayCount = filledContributions.length ?? 0;
+  const dayCount = filledContributions.length;
   const weekColumns = Math.max(1, Math.ceil(dayCount / 7));
-  const heatmapMinWidth = Math.max(weekColumns * (RECT_SIZE + SPACE), 640);
+  const heatmapMinWidth = Math.max(
+    HEATMAP_LEFT_PAD + weekColumns * (RECT_SIZE + SPACE),
+    640,
+  );
 
   const defaultLabel = `${formatNumber(data.totalContributions)} contributions in the last year`;
   const [hoveredTile, setHoveredTile] = React.useState<string>(defaultLabel);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+
+  const heatmapColors = theme.palette.bento.heatmap;
 
   React.useEffect(() => {
     if (scrollRef.current) {
@@ -105,15 +122,9 @@ export default function GitHubActivityCard({ data }: Props) {
           rectSize={RECT_SIZE}
           rectProps={{ rx: 4 }}
           rectRender={renderRect((value) => setHoveredTile(value))}
-          panelColors={{
-            0: "#0B1220",
-            1: "#19222F",
-            4: "#0F4E43",
-            8: "#1F977B",
-            12: "#1EF4AE",
-          }}
+          panelColors={heatmapColors}
           style={{
-            color: "#fff",
+            color: theme.palette.text.primary,
             width: "100%",
             minWidth: `${heatmapMinWidth}px`,
           }}

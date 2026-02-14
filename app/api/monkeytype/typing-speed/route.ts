@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { ONE_DAY_SECONDS, ONE_HOUR_SECONDS } from "@/lib/cache";
 
-// Next.js segment config requires a literal value.
-export const revalidate = 86400;
-
 type MonkeytypeResult = {
   wpm: number;
   acc: number;
@@ -20,26 +17,6 @@ type TypingSpeedPayload = {
   duration: "15s";
   language: string;
   timestamp: number;
-};
-
-const CACHE_TTL_MS = ONE_DAY_SECONDS * 1000;
-
-type CacheState = {
-  expiresAt: number;
-  value: TypingSpeedPayload | null;
-  promise: Promise<TypingSpeedPayload | null> | null;
-};
-
-const cache: CacheState = {
-  expiresAt: 0,
-  value: null,
-  promise: null,
-};
-
-const is15s = (r: MonkeytypeResult) => {
-  const td = Number(r.testDuration);
-  const m2 = r.mode2 != null ? String(r.mode2) : "";
-  return m2 === "15" || (Number.isFinite(td) && td >= 14.5 && td <= 15.5);
 };
 
 const fetchTypingSpeed = async (): Promise<TypingSpeedPayload | null> => {
@@ -60,9 +37,13 @@ const fetchTypingSpeed = async (): Promise<TypingSpeedPayload | null> => {
 
   const json = (await res.json()) as { data?: MonkeytypeResult[] };
   const data = Array.isArray(json.data) ? json.data : [];
-
   const best15 = data
-    .filter((r) => r.mode === "time" && is15s(r))
+    .filter((result) => {
+      if (result.mode !== "time") return false;
+      if (String(result.mode2 ?? "") === "15") return true;
+      const duration = Number(result.testDuration);
+      return Number.isFinite(duration) && duration >= 14.5 && duration <= 15.5;
+    })
     .sort((a, b) => {
       const wpmDiff = b.wpm - a.wpm;
       if (wpmDiff !== 0) return wpmDiff;
@@ -85,35 +66,8 @@ const fetchTypingSpeed = async (): Promise<TypingSpeedPayload | null> => {
   };
 };
 
-const startCacheRefresh = (): Promise<TypingSpeedPayload | null> => {
-  const promise = (async () => {
-    try {
-      const data = await fetchTypingSpeed();
-      if (data) {
-        cache.value = data;
-        cache.expiresAt = Date.now() + CACHE_TTL_MS;
-      }
-      return cache.value;
-    } finally {
-      cache.promise = null;
-    }
-  })();
-
-  cache.promise = promise;
-  return promise;
-};
-
-const getTypingSpeed = async () => {
-  const now = Date.now();
-  const cacheIsFresh = cache.value && cache.expiresAt > now;
-
-  if (cacheIsFresh) return cache.value;
-  if (cache.promise) return cache.promise;
-  return startCacheRefresh();
-};
-
 export async function GET() {
-  const data = await getTypingSpeed();
+  const data = await fetchTypingSpeed();
 
   if (!data) {
     return NextResponse.json(

@@ -37,6 +37,27 @@ type ContributionsCache = {
   value: GithubContributionData | null;
 };
 
+type GithubContributionsResponse = {
+  user: {
+    repositories: {
+      nodes: Array<{
+        pushedAt: string | null;
+      }>;
+    };
+    contributionsCollection: {
+      contributionCalendar: {
+        totalContributions: number;
+        weeks: Array<{
+          contributionDays: Array<{
+            contributionCount: number;
+            date: string;
+          }>;
+        }>;
+      };
+    };
+  };
+};
+
 const contributionsCache: ContributionsCache = {
   expiresAt: 0,
   hasValue: false,
@@ -71,11 +92,14 @@ const getGithubContributionsUncached =
       fromDate.setUTCFullYear(now.getUTCFullYear() - 1);
       const from = fromDate.toISOString();
 
-      const response = (await client.request(GetGithubContributions, {
-        userName: username,
-        from,
-        to,
-      })) as { user: any };
+      const response = await client.request<GithubContributionsResponse>(
+        GetGithubContributions,
+        {
+          userName: username,
+          from,
+          to,
+        },
+      );
 
       const calendar =
         response.user.contributionsCollection.contributionCalendar;
@@ -84,8 +108,8 @@ const getGithubContributionsUncached =
       return {
         totalContributions: calendar.totalContributions,
         lastPushedAt: lastRepo?.pushedAt ?? new Date().toISOString(),
-        contributions: calendar.weeks.flatMap((week: any) =>
-          week.contributionDays.map((day: any) => ({
+        contributions: calendar.weeks.flatMap((week) =>
+          week.contributionDays.map((day) => ({
             count: day.contributionCount,
             date: day.date,
           })),
@@ -130,17 +154,10 @@ export function refreshGithubContributionsCache() {
 
 export async function getGithubContributions() {
   const now = Date.now();
-
   const cacheIsFresh =
     contributionsCache.hasValue && contributionsCache.expiresAt > now;
 
-  if (cacheIsFresh) {
-    return contributionsCache.value;
-  }
-
-  if (contributionsCache.promise) {
-    return contributionsCache.promise;
-  }
-
+  if (cacheIsFresh) return contributionsCache.value;
+  if (contributionsCache.promise) return contributionsCache.promise;
   return startCacheRefresh();
 }

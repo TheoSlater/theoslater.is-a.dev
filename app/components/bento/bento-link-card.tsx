@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import Box from "@mui/material/Box";
+import { useTheme } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material";
 import { BentoCard } from "./bento-card";
 
@@ -23,6 +24,7 @@ export function BentoLinkCard({
   minHeight,
   sx,
 }: BentoLinkCardProps) {
+  const theme = useTheme();
   return (
     <Box
       component={Link}
@@ -33,8 +35,14 @@ export function BentoLinkCard({
         height: "100%",
         textDecoration: "none",
         color: "inherit",
+        "&:hover": {
+          textDecoration: "none",
+        },
+        "& *": {
+          textDecoration: "none",
+        },
         "&:focus-visible": {
-          outline: "2px solid rgba(148, 163, 184, 0.8)",
+          outline: `2px solid ${theme.palette.bento.focusOutline}`,
           outlineOffset: "4px",
         },
       }}
@@ -43,15 +51,17 @@ export function BentoLinkCard({
         colSpan={colSpan}
         rowSpan={rowSpan}
         minHeight={minHeight}
-        sx={{
-          cursor: "pointer",
-          transition: "transform 200ms ease, box-shadow 200ms ease",
-          "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 18px 40px rgba(15, 23, 42, 0.35)",
+        sx={[
+          {
+            cursor: "pointer",
+            transition: "transform 200ms ease, box-shadow 200ms ease",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: theme.palette.bento.cardHoverShadow,
+            },
           },
-          ...sx,
-        }}
+          sx,
+        ]}
       >
         {children}
       </BentoCard>

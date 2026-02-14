@@ -1,15 +1,13 @@
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material";
 import type { ElementType, ReactNode } from "react";
 
 const toCssSize = (value?: number | string) =>
-  value === undefined
-    ? undefined
-    : typeof value === "number"
-      ? `${value}px`
-      : value;
+  typeof value === "number" ? `${value}px` : value;
+
+const DEFAULT_MIN_HEIGHT = "160px";
 
 interface BentoCardProps {
   children?: ReactNode;
@@ -42,35 +40,42 @@ export function BentoCard({
   rel,
   ariaLabel,
 }: BentoCardProps) {
-  const cardMinHeight = toCssSize(minHeight) ?? "160px";
+  const theme = useTheme();
+  const cardMinHeight = toCssSize(minHeight) ?? DEFAULT_MIN_HEIGHT;
   const componentProps = component
     ? { component, href, target, rel, "aria-label": ariaLabel }
     : {};
   return (
     <Box
       {...componentProps}
-      sx={{
-        gridColumn: {
-          xs: "span 1",
-          sm: `span ${Math.min(colSpan, 2)}`,
-          md: `span ${colSpan}`,
+      sx={[
+        {
+          gridColumn: {
+            xs: "span 1",
+            sm: `span ${Math.min(colSpan, 2)}`,
+            md: `span ${colSpan}`,
+          },
+          gridRow: {
+            xs: "span 1",
+            sm: `span ${rowSpan}`,
+            md: `span ${rowSpan}`,
+          },
+          backgroundColor: theme.palette.bento.cardBackground,
+          borderRadius: "24px",
+          border: "1px solid",
+          borderColor: theme.palette.bento.cardBorder,
+          padding: "24px",
+          minHeight: cardMinHeight,
+          height: toCssSize(height),
+          width: toCssSize(width),
+          minWidth: 0,
+          aspectRatio,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
         },
-        gridRow: { xs: "span 1", sm: `span ${rowSpan}`, md: `span ${rowSpan}` },
-        backgroundColor: "rgba(30, 41, 59, 0.6)",
-        borderRadius: "24px",
-        border: "1px solid",
-        borderColor: "divider",
-        padding: "24px",
-        minHeight: cardMinHeight,
-        height: toCssSize(height),
-        width: toCssSize(width),
-        minWidth: 0,
-        aspectRatio,
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        ...sx,
-      }}
+        sx,
+      ]}
     >
       {children}
     </Box>
