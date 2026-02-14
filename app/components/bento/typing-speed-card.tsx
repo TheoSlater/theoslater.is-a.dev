@@ -86,14 +86,38 @@ export default function TypingSpeedCard({
       sx={[
         {
           cursor: "pointer",
-          textDecoration: "none",
+          textDecoration: "none !important",
+          textDecorationColor: "transparent",
           color: "inherit",
-          "&:link": { color: "inherit" },
-          "&:visited": { color: "inherit" },
-          "&:active": { color: "inherit" },
-          "&:hover": { textDecoration: "none" },
-          "& *": { textDecoration: "none", color: "inherit" },
-          "& .MuiTypography-root": { textDecoration: "none", color: "inherit" },
+          "&:link": {
+            color: "inherit",
+            textDecoration: "none",
+            textDecorationColor: "transparent",
+          },
+          "&:visited": {
+            color: "inherit",
+            textDecoration: "none",
+            textDecorationColor: "transparent",
+          },
+          "&:active": {
+            color: "inherit",
+            textDecoration: "none",
+            textDecorationColor: "transparent",
+          },
+          "&:hover": {
+            textDecoration: "none",
+            textDecorationColor: "transparent",
+          },
+          "& *": {
+            textDecoration: "none !important",
+            textDecorationColor: "transparent",
+            color: "inherit",
+          },
+          "& .MuiTypography-root": {
+            textDecoration: "none !important",
+            textDecorationColor: "transparent",
+            color: "inherit",
+          },
           "&:focus-visible": {
             outline: `2px solid ${theme.palette.bento.focusOutline}`,
             outlineOffset: "4px",

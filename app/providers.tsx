@@ -21,6 +21,35 @@ const theme = createTheme({
     divider: "rgba(255, 255, 255, 0.12)",
     bento: bentoPalette,
   },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        a: {
+          color: "inherit",
+          textDecoration: "none",
+          textDecorationColor: "transparent",
+        },
+        "a:visited": {
+          color: "inherit",
+          textDecoration: "none",
+          textDecorationColor: "transparent",
+        },
+        "a:hover": {
+          color: "inherit",
+          textDecoration: "none",
+          textDecorationColor: "transparent",
+        },
+        "a:active": {
+          color: "inherit",
+          textDecoration: "none",
+          textDecorationColor: "transparent",
+        },
+        "a:focus-visible": {
+          outline: "inherit",
+        },
+      },
+    },
+  },
 });
 
 export default function Providers({ children }: { children: ReactNode }) {
