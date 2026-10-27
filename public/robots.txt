@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://theoslater.is-a.dev/sitemap.xml
