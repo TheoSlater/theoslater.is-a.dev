@@ -195,89 +195,91 @@ function App() {
 
   return (
     <main className="page-shell">
-      <div className="intro-copy">
-        <h1>
-          I’m Theo, a 16-year-old software engineer in the UK. I build open-source apps and tools,
-          especially when I think something could work better.
-        </h1>
-        <p>
-          I’m currently a software developer and support apprentice at Nexdynamic, the team behind
-          Squeegee.
-        </p>
-        <p>
-          I’m currently building{' '}
-          <a className="text-link" href="https://photonapp.co.uk">
-            Photon
-          </a>
-          , a new kind of browser powered by Ladybird, an independent browser.{' '}
-          <a className="text-link text-link--muted" href="https://photonapp.co.uk">
-            More info
-          </a>
-        </p>
+      <div className={`page-content${dialogOpen ? ' page-content--blurred' : ''}`}>
+        <div className="intro-copy">
+          <h1>
+            I’m Theo, a 16-year-old software engineer in the UK. I build open-source apps and tools,
+            especially when I think something could work better.
+          </h1>
+          <p>
+            I’m currently a software developer and support apprentice at Nexdynamic, the team behind
+            Squeegee.
+          </p>
+          <p>
+            I’m currently building{' '}
+            <a className="text-link" href="https://photonapp.co.uk">
+              Photon
+            </a>
+            , a new kind of browser powered by Ladybird, an independent browser.{' '}
+            <a className="text-link text-link--muted" href="https://photonapp.co.uk">
+              More info
+            </a>
+          </p>
+        </div>
+
+        <section className="project-section" id="projects" aria-labelledby="projects-heading">
+          <div className="project-section__heading">
+            <h2 id="projects-heading">Projects</h2>
+            <a className="project-section__all-link" href="https://github.com/theoslater">
+              More on GitHub
+              <ArrowUpRight
+                aria-hidden="true"
+                className="project-icon"
+                size={14}
+                strokeWidth={1.75}
+              />
+            </a>
+          </div>
+
+          <article className="featured-project">
+            <button
+              ref={triggerRef}
+              aria-controls="photon-project-dialog"
+              aria-expanded={dialogOpen}
+              aria-haspopup="dialog"
+              aria-label="Open Photon project details"
+              className={`project-preview${dialogMounted ? ' project-preview--active' : ''}`}
+              onClick={openDialog}
+              type="button"
+            >
+              <span ref={previewMediaRef} className="project-preview__media">
+                <FeaturedMedia media={featuredMedia} />
+              </span>
+              <span className="project-preview__caption">
+                An independent browser built on Ladybird.
+              </span>
+            </button>
+          </article>
+
+          <div className="project-list">
+            <h3 className="project-list__heading">More projects</h3>
+            <ul>
+              {projects.map((project) => (
+                <li key={project.name}>
+                  <a
+                    aria-label={`View ${project.name} on GitHub`}
+                    className="project-row"
+                    href={project.href}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    <span className="project-row__copy">
+                      <span className="project-row__name">{project.name}</span>
+                      <span className="project-row__description">{project.description}</span>
+                    </span>
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="project-row__arrow"
+                      size={16}
+                      strokeWidth={1.75}
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
       </div>
-
-      <section className="project-section" id="projects" aria-labelledby="projects-heading">
-        <div className="project-section__heading">
-          <h2 id="projects-heading">Projects</h2>
-          <a className="project-section__all-link" href="https://github.com/theoslater">
-            More on GitHub
-            <ArrowUpRight
-              aria-hidden="true"
-              className="project-icon"
-              size={14}
-              strokeWidth={1.75}
-            />
-          </a>
-        </div>
-
-        <article className="featured-project">
-          <button
-            ref={triggerRef}
-            aria-controls="photon-project-dialog"
-            aria-expanded={dialogOpen}
-            aria-haspopup="dialog"
-            aria-label="Open Photon project details"
-            className={`project-preview${dialogMounted ? ' project-preview--active' : ''}`}
-            onClick={openDialog}
-            type="button"
-          >
-            <span ref={previewMediaRef} className="project-preview__media">
-              <FeaturedMedia media={featuredMedia} />
-            </span>
-            <span className="project-preview__caption">
-              An independent browser built on Ladybird.
-            </span>
-          </button>
-        </article>
-
-        <div className="project-list">
-          <h3 className="project-list__heading">More projects</h3>
-          <ul>
-            {projects.map((project) => (
-              <li key={project.name}>
-                <a
-                  aria-label={`View ${project.name} on GitHub`}
-                  className="project-row"
-                  href={project.href}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <span className="project-row__copy">
-                    <span className="project-row__name">{project.name}</span>
-                    <span className="project-row__description">{project.description}</span>
-                  </span>
-                  <ArrowUpRight
-                    aria-hidden="true"
-                    className="project-row__arrow"
-                    size={16}
-                    strokeWidth={1.75}
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
 
       {dialogMounted && (
         <div

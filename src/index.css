@@ -73,6 +73,14 @@ body::-webkit-scrollbar,
   line-height: 1.75;
 }
 
+.page-content {
+  transition: filter var(--modal-open-dur) var(--modal-ease);
+}
+
+.page-content--blurred {
+  filter: blur(var(--project-overlay-blur));
+}
+
 .intro-copy {
   display: grid;
   gap: 1.25rem;
@@ -205,8 +213,6 @@ body::-webkit-scrollbar,
   overflow-y: auto;
   padding: clamp(4.5rem, 8vh, 6rem) 0 2rem;
   background: color-mix(in oklab, var(--background) var(--project-overlay-tint), transparent);
-  backdrop-filter: blur(var(--project-overlay-blur));
-  -webkit-backdrop-filter: blur(var(--project-overlay-blur));
 }
 
 .project-dialog {
