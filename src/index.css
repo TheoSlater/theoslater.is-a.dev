@@ -25,8 +25,8 @@
   --content-gutter: 3rem;
   --project-dialog-width: 48rem;
   --project-media-radius: 0.625rem;
-  --project-overlay-tint: 40%;
-  --project-overlay-blur: 22px;
+  --project-overlay-tint: 20%;
+  --project-overlay-blur: 12px;
   --modal-open-dur: 250ms;
   --modal-close-dur: 150ms;
   --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -168,17 +168,12 @@ body::-webkit-scrollbar,
   border-radius: var(--project-media-radius);
 }
 
-.project-preview__media {
-  view-transition-name: photon-media;
-}
-
 .project-preview--active .project-preview__media {
   visibility: hidden;
-  view-transition-name: none;
 }
 
 .project-dialog__media {
-  view-transition-name: photon-media;
+  transform-origin: top left;
 }
 
 .project-media {
@@ -298,25 +293,6 @@ body::-webkit-scrollbar,
   transition: opacity var(--modal-close-dur) var(--modal-ease);
 }
 
-::view-transition-group(photon-media) {
-  animation-duration: var(--modal-open-dur);
-  animation-timing-function: var(--modal-ease);
-}
-
-::view-transition-old(photon-media),
-::view-transition-new(photon-media) {
-  height: 100%;
-  border-radius: var(--project-media-radius);
-  object-fit: cover;
-  animation: none;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: var(--modal-open-dur);
-  animation-timing-function: var(--modal-ease);
-}
-
 .project-list {
   margin-top: 2.25rem;
 }
@@ -432,12 +408,6 @@ body::-webkit-scrollbar,
 @media (prefers-reduced-motion: reduce) {
   .t-modal {
     transition: none !important;
-  }
-
-  ::view-transition-group(photon-media),
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 1ms !important;
   }
 
   *,

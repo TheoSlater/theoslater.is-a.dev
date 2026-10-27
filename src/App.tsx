@@ -1,18 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowUpRight, X } from 'lucide-react';
-import { flushSync } from 'react-dom';
-
-type ViewTransitionDocument = Document & {
-  startViewTransition?: (callback: () => void) => unknown;
-};
-
-function startSharedTransition(update: () => void) {
-  const startViewTransition = (document as ViewTransitionDocument).startViewTransition;
-  if (!startViewTransition) return false;
-
-  startViewTransition.call(document, () => flushSync(update));
-  return true;
-}
 
 type ProjectMedia =
   | { type: 'image'; src: string; alt: string }
@@ -23,6 +10,15 @@ type Project = {
   description: string;
   href: string;
 };
+
+function getMediaTransform(source: DOMRect, target: DOMRect) {
+  const x = source.left - target.left;
+  const y = source.top - target.top;
+  const scaleX = source.width / target.width;
+  const scaleY = source.height / target.height;
+
+  return `translate(${x}px, ${y}px) scale(${scaleX}, ${scaleY})`;
+}
 
 const featuredMedia: ProjectMedia = {
   type: 'image',
@@ -74,8 +70,11 @@ function App() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogClosing, setDialogClosing] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const previewMediaRef = useRef<HTMLSpanElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
+  const dialogMediaRef = useRef<HTMLDivElement>(null);
+  const sourceMediaRectRef = useRef<DOMRect | null>(null);
   const closeTimeoutRef = useRef<number | null>(null);
 
   const closeDialog = useCallback(() => {
@@ -84,15 +83,12 @@ function App() {
       closeTimeoutRef.current = null;
     }
 
-    const closeImmediately = () => {
-      setDialogOpen(false);
-      setDialogClosing(false);
-      setDialogMounted(false);
-    };
-
-    if (startSharedTransition(closeImmediately)) {
-      triggerRef.current?.focus();
-      return;
+    const media = dialogMediaRef.current;
+    const sourceRect = sourceMediaRectRef.current;
+    if (media && sourceRect) {
+      const targetRect = media.getBoundingClientRect();
+      media.style.transition = 'transform var(--modal-close-dur) var(--modal-ease)';
+      media.style.transform = getMediaTransform(sourceRect, targetRect);
     }
 
     const closeDuration =
@@ -111,17 +107,30 @@ function App() {
   }, []);
 
   const openDialog = () => {
-    const openImmediately = () => {
-      setDialogClosing(false);
-      setDialogMounted(true);
-      setDialogOpen(true);
-    };
-
-    if (!startSharedTransition(openImmediately)) {
-      setDialogClosing(false);
-      setDialogMounted(true);
-    }
+    sourceMediaRectRef.current = previewMediaRef.current?.getBoundingClientRect() ?? null;
+    setDialogClosing(false);
+    setDialogMounted(true);
   };
+
+  useLayoutEffect(() => {
+    if (!dialogMounted || dialogClosing) return;
+
+    const media = dialogMediaRef.current;
+    const sourceRect = sourceMediaRectRef.current;
+    if (!media || !sourceRect) return;
+
+    const targetRect = media.getBoundingClientRect();
+    media.style.transition = 'none';
+    media.style.transform = getMediaTransform(sourceRect, targetRect);
+    media.getBoundingClientRect();
+
+    const frame = window.requestAnimationFrame(() => {
+      media.style.transition = 'transform var(--modal-open-dur) var(--modal-ease)';
+      media.style.transform = 'none';
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [dialogClosing, dialogMounted]);
 
   useEffect(() => {
     if (!dialogMounted || dialogClosing || dialogOpen) return;
@@ -228,11 +237,11 @@ function App() {
             aria-expanded={dialogOpen}
             aria-haspopup="dialog"
             aria-label="Open Photon project details"
-            className={`project-preview${dialogOpen ? ' project-preview--active' : ''}`}
+            className={`project-preview${dialogMounted ? ' project-preview--active' : ''}`}
             onClick={openDialog}
             type="button"
           >
-            <span className="project-preview__media">
+            <span ref={previewMediaRef} className="project-preview__media">
               <FeaturedMedia media={featuredMedia} />
             </span>
             <span className="project-preview__caption">
@@ -298,7 +307,7 @@ function App() {
               <X aria-hidden="true" size={20} strokeWidth={1.75} />
             </button>
 
-            <div className="project-dialog__media">
+            <div ref={dialogMediaRef} className="project-dialog__media">
               <FeaturedMedia detail media={featuredMedia} />
             </div>
             <div className="project-dialog__details">
