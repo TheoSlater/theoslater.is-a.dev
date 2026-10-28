@@ -198,8 +198,9 @@ function App() {
       <div className={`page-content${dialogOpen ? ' page-content--blurred' : ''}`}>
         <div className="intro-copy">
           <h1>
-            I’m Theo, a 16-year-old software engineer in the UK. I build open-source apps and tools,
-            especially when I think something could work better.
+            I’m Theo, a <span className="intro-highlight">16-year-old software engineer</span> in
+            the UK. I build open-source apps and tools, especially when I think something could work
+            better.
           </h1>
           <p>
             I’m currently a software developer and support apprentice at Nexdynamic, the team behind

@@ -10,6 +10,7 @@
 
 @theme {
   --font-sans: 'DM Sans', sans-serif;
+  --font-handwriting: 'Caveat', cursive;
   --font-mono: ui-monospace, Consolas, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -93,6 +94,12 @@ body::-webkit-scrollbar,
 .intro-copy h1 {
   margin: 0;
   font: inherit;
+}
+
+.intro-highlight {
+  font-family: var(--font-handwriting);
+  font-weight: 600;
+  font-size: 1.3em;
 }
 
 .text-link {
